@@ -1,0 +1,46 @@
+// prisma/models/activity.prisma
+// The digital logbook — PRD calls this "the core MVP feature". Each entry
+// is one daily/weekly activity a student submits, reviewed by their
+// Supervisor with a status, comment, and rating.
+
+enum ActivityStatus {
+  PENDING
+  APPROVED
+  NEEDS_REVISION
+  REJECTED
+}
+
+model Activity {
+  id String @id @default(cuid())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  date            DateTime
+  title           String
+  description     String
+  whatILearned    String?
+  skillsUsed      String[]
+  hoursWorked     Float
+  challenges      String?
+  category        String? // "project/activity category" per PRD
+
+  supportingImageUrl String? // secure storage reference (JPEG/PNG evidence)
+  documentId         String? // link to a Document row for non-image evidence
+  document           Document? @relation(fields: [documentId], references: [id])
+
+  // -- Supervisor review ----------------------------------------------------
+  status        ActivityStatus @default(PENDING)
+  reviewedById  String?
+  reviewedBy    Supervisor?    @relation(fields: [reviewedById], references: [id])
+  reviewedAt    DateTime?
+  comment       String?
+  rating        Int? // e.g. 1–5
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([date])
+}

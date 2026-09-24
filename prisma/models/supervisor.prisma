@@ -1,0 +1,59 @@
+// ==========================================================================
+// supervisor.prisma — Company supervisor profile + activation workflow
+//
+// Per PRD: "A supervisor shouldn't simply create an account and immediately
+// start approving student activities." Activation is a distinct, narrower
+// flow than full identity verification: Company → Adds Supervisor →
+// Supervisor Completes Profile → Company Confirms → Supervisor Activated.
+// ==========================================================================
+
+enum SupervisorActivationStatus {
+  INVITED              // added by company admin, not yet completed profile
+  PROFILE_COMPLETED    // supervisor filled in their details, awaiting confirmation
+  ACTIVE               // confirmed by company admin, can review activities
+  SUSPENDED
+}
+
+model Supervisor {
+  id String @id @default(cuid())
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  fullName       String
+  position       String
+  department     String
+  email          String  @unique
+  phone          String
+  profileImageUrl String?
+
+  companyStaffId String? // internal company ID/staff ID, where applicable
+
+  // -- Activation (company-admin confirmation) -------------------------------
+  activationStatus SupervisorActivationStatus @default(INVITED)
+  confirmedById    String?
+  confirmedBy      User?                       @relation("SupervisorConfirmedBy", fields: [confirmedById], references: [id])
+  confirmedAt      DateTime?
+
+  // -- Optional stronger identity verification (mirrors other entities) -----
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedBy         User?               @relation("SupervisorVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+
+  // -- Relations ------------------------------------------------------------
+  students           Student[]
+  documents          Document[]
+  reviewedActivities Activity[]
+  // Verification history: query Verification where entityType = SUPERVISOR
+  // and entityId = this supervisor's id.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([activationStatus])
+}

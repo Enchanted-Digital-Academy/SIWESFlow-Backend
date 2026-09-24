@@ -1,0 +1,41 @@
+model Company {
+  id String @id @default(cuid())
+
+  companyCode      String  @unique
+  name             String
+  registrationName String?
+  industry         String
+  description      String?
+
+  address String
+  state   String
+  country String
+
+  website String?
+  email   String  @unique
+  phone   String
+  logoUrl String?
+
+  // -- Business verification --------------------------------------------
+  cacNumber              String?
+  registrationDocumentId String?
+
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedBy         User?               @relation("CompanyVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+
+  // -- Relations ------------------------------------------------------------
+  supervisors       Supervisor[]
+  placements        Placement[]
+  documents         Document[]
+  approvedBySchools School[] @relation("SchoolApprovedCompanies")
+  // Verification history: query Verification where entityType = COMPANY
+  // and entityId = this company's id.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([verificationStatus])
+  @@index([industry])
+}

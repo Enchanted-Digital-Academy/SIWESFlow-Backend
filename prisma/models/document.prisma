@@ -1,0 +1,81 @@
+// ==========================================================================
+// document.prisma — Uploaded files + required metadata (per PRD: "Do not
+// simply store a file URL without metadata.")
+//
+// A document belongs to exactly one owner: a Student, School, Company or
+// Supervisor. Prisma has no native polymorphic relation, so this uses one
+// nullable FK per possible owner rather than a generic (ownerType, ownerId)
+// pair — real foreign keys, real cascade deletes, real join performance.
+// The trade-off is enforcing "exactly one owner FK is set" isn't expressible
+// in the schema itself; add it as a raw Postgres CHECK constraint in the
+// migration SQL, e.g.:
+//   ALTER TABLE "Document" ADD CONSTRAINT document_single_owner
+//   CHECK (num_nonnulls("studentId","schoolId","companyId","supervisorId") = 1);
+// ==========================================================================
+
+enum DocumentType {
+  PASSPORT_PHOTO
+  STUDENT_ID_CARD
+  ACCEPTANCE_LETTER
+  PLACEMENT_LETTER
+  SCHOOL_INTRO_LETTER
+  ACCREDITATION_DOCUMENT
+  SIWES_GUIDELINES
+  CAC_REGISTRATION
+  BUSINESS_REGISTRATION
+  GOVERNMENT_ID
+  PROOF_OF_EMPLOYMENT
+  ACTIVITY_EVIDENCE
+  OTHER
+}
+
+enum FileFormat {
+  PDF
+  DOC
+  DOCX
+  JPG
+  JPEG
+  PNG
+}
+
+model Document {
+  id String @id @default(cuid())
+
+  // -- Exactly one of these should be set (see CHECK constraint above) -----
+  studentId    String?
+  student      Student?    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schoolId     String?
+  school       School?     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  companyId    String?
+  company      Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  supervisorId String?
+  supervisor   Supervisor? @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  documentType DocumentType
+  filename     String
+  fileFormat   FileFormat
+  fileSizeBytes Int
+  storageKey   String // secure object-storage reference; never a public/predictable URL
+
+  uploadedById String?
+  uploadedBy   User?   @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
+  uploadedAt   DateTime @default(now())
+
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedBy         User?               @relation("DocumentVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+
+  verification   Verification? @relation(fields: [verificationId], references: [id])
+  verificationId String?
+
+  // Activity evidence: an Activity can attach this document as supporting proof
+  activities Activity[]
+
+  @@index([studentId])
+  @@index([schoolId])
+  @@index([companyId])
+  @@index([supervisorId])
+  @@index([documentType])
+  @@index([verificationStatus])
+}

@@ -1,0 +1,32 @@
+// prisma/models/application.prisma
+// A student's application to a specific Placement (PRD: "Students apply",
+// "Companies review applications, accept/reject students").
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+model Application {
+  id String @id @default(cuid())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  placementId String
+  placement   Placement @relation(fields: [placementId], references: [id], onDelete: Cascade)
+
+  status     ApplicationStatus @default(PENDING)
+  coverNote  String?
+  appliedAt  DateTime          @default(now())
+  respondedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, placementId]) // a student applies to a given placement once
+  @@index([placementId])
+  @@index([status])
+}

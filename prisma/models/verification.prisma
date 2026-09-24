@@ -1,0 +1,43 @@
+enum VerificationStatus {
+  UNVERIFIED
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum VerifiableEntityType {
+  STUDENT
+  SCHOOL
+  COMPANY
+  SUPERVISOR
+}
+
+model Verification {
+  id String @id @default(cuid())
+
+  entityType VerifiableEntityType
+  entityId   String
+
+  status      VerificationStatus @default(SUBMITTED)
+  submittedAt DateTime           @default(now())
+
+  reviewedById    String?
+  reviewedBy      User?     @relation("VerificationReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt      DateTime?
+  rejectionReason String?
+  notes           String?
+
+  documents Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // NOTE: entityId deliberately has no @relation — a single column can't be
+  // a real foreign key into four different tables. Look up the target row
+  // in application code, e.g.:
+  //   if (v.entityType === "SCHOOL") prisma.school.findUnique({ where: { id: v.entityId } })
+
+  @@index([entityType, entityId])
+  @@index([status])
+}

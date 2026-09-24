@@ -4,8 +4,11 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
 }
 
 datasource db {
@@ -21,12 +24,29 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      UserRole
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  role     UserRole
 
   isEmailVerified Boolean @default(false)
+
+  // -- Reverse relations: what this user IS --------------------------------
+  student           Student?
+  supervisorProfile Supervisor?
+
+  // -- Reverse relations: what this user DOES to other entities -----------
+  schoolsCoordinated    School[]       @relation("SchoolCoordinator")
+  studentsCoordinated   Student[]      @relation("CoordinatorStudents")
+  confirmedSupervisors  Supervisor[]   @relation("SupervisorConfirmedBy")
+  uploadedDocuments     Document[]     @relation("DocumentUploadedBy")
+  reviewedVerifications Verification[] @relation("VerificationReviewedBy")
+
+  verifiedStudents    Student[]    @relation("StudentVerifiedBy")
+  verifiedSchools     School[]     @relation("SchoolVerifiedBy")
+  verifiedCompanies   Company[]    @relation("CompanyVerifiedBy")
+  verifiedSupervisors Supervisor[] @relation("SupervisorVerifiedBy")
+  verifiedDocuments   Document[]   @relation("DocumentVerifiedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

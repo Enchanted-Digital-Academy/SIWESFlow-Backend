@@ -1,0 +1,92 @@
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum PlacementStatus {
+  UNPLACED
+  APPLIED
+  PLACED
+  COMPLETED
+  WITHDRAWN
+}
+
+// VerificationStatus enum lives in verification.prisma (shared across
+// Student, School, Company, Supervisor and Document).
+
+enum EngagementStatus {
+  ACTIVE
+  AT_RISK
+  INACTIVE
+}
+
+model Student {
+  id String @id @default(cuid())
+
+  // Link to the shared User/auth record (registration, login, RBAC role)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // -- Personal information --------------------------------------------
+  studentCode      String   @unique // human-facing Student ID (distinct from cuid pk)
+  firstName        String
+  middleName       String?
+  lastName         String
+  dateOfBirth      DateTime
+  gender           Gender
+  email            String   @unique
+  phoneNumber      String
+  address          String?
+  passportPhotoUrl String?  // secure object storage reference, not a public URL
+
+  // -- Academic information ----------------------------------------------
+  schoolId            String
+  school              School   @relation(fields: [schoolId], references: [id])
+  faculty             String
+  department          String
+  programme           String
+  level               String
+  matriculationNumber String
+  academicSession     String
+  siwesSession        String
+
+  // -- SIWES information ---------------------------------------------------
+  siwesStartDate  DateTime?
+  siwesEndDate    DateTime?
+  placementStatus PlacementStatus @default(UNPLACED)
+
+  placementId String?    @unique
+  placement   Placement? @relation(fields: [placementId], references: [id])
+
+  supervisorId String?
+  supervisor   Supervisor? @relation(fields: [supervisorId], references: [id])
+
+  coordinatorId String?
+  coordinator   User?    @relation("CoordinatorStudents", fields: [coordinatorId], references: [id])
+
+  // -- Verification ---------------------------------------------------------
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedBy         User?               @relation("StudentVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+
+  // -- Relations ----------------------------------------------------------
+  documents    Document[]
+  activities   Activity[]
+  applications Application[]
+
+  // -- Engagement (derived / cached, recomputed by a scheduled job) -------
+  engagementStatus        EngagementStatus @default(INACTIVE)
+  lastActivitySubmittedAt DateTime?
+
+  // -- Audit ----------------------------------------------------------------
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([schoolId])
+  @@index([placementStatus])
+  @@index([verificationStatus])
+  @@index([engagementStatus])
+}

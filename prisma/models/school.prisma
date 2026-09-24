@@ -1,0 +1,53 @@
+enum InstitutionType {
+  UNIVERSITY
+  POLYTECHNIC
+  COLLEGE
+  OTHER
+}
+
+model School {
+  id String @id @default(cuid())
+
+  schoolCode      String @unique
+  name            String
+  institutionType InstitutionType
+
+  address String
+  state   String
+  country String
+
+  email   String  @unique
+  phone   String
+  website String?
+  logoUrl String?
+
+  // -- SIWES administration -------------------------------------------------
+  coordinatorId    String?
+  coordinator      User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
+  coordinatorEmail String?
+  coordinatorPhone String?
+
+  faculties         String[]
+  departments       String[]
+  programmes        String[]
+  levels            String[]
+  siwesRequirements String?
+
+  // -- Verification (current status — see Verification model for history) --
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String?
+  verifiedBy         User?               @relation("SchoolVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt         DateTime?
+
+  // -- Relations ------------------------------------------------------------
+  students          Student[]
+  approvedCompanies Company[] @relation("SchoolApprovedCompanies")
+  documents         Document[]
+  // Verification history: query Verification where entityType = SCHOOL
+  // and entityId = this school's id.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([verificationStatus])
+}
