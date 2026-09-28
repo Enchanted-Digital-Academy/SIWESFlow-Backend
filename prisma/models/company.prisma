@@ -16,7 +16,6 @@ model Company {
   phone   String
   logoUrl String?
 
-  // -- Business verification --------------------------------------------
   cacNumber              String?
   registrationDocumentId String?
 
@@ -25,13 +24,10 @@ model Company {
   verifiedBy         User?               @relation("CompanyVerifiedBy", fields: [verifiedById], references: [id])
   verifiedAt         DateTime?
 
-  // -- Relations ------------------------------------------------------------
   supervisors       Supervisor[]
   placements        Placement[]
   documents         Document[]
   approvedBySchools School[] @relation("SchoolApprovedCompanies")
-  // Verification history: query Verification where entityType = COMPANY
-  // and entityId = this company's id.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -1,17 +1,14 @@
-// prisma/models/placement.prisma
-// Company-posted SIWES placement opportunities (PRD: "Placement Management").
-
 model Placement {
   id String @id @default(cuid())
 
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  title            String
-  description      String?
-  department       String
-  requiredLevel    String?
-  requiredSkills   String[]
+  title          String
+  description    String?
+  department     String
+  requiredLevel  String?
+  requiredSkills String[]
 
   availableSlots Int
   filledSlots    Int @default(0)
@@ -23,9 +20,8 @@ model Placement {
 
   isActive Boolean @default(true)
 
-  // -- Relations ------------------------------------------------------------
   applications Application[]
-  student      Student?      // the one student currently occupying this placement (via Student.placementId)
+  student      Student?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

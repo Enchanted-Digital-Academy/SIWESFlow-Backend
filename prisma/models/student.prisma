@@ -25,12 +25,10 @@ enum EngagementStatus {
 model Student {
   id String @id @default(cuid())
 
-  // Link to the shared User/auth record (registration, login, RBAC role)
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // -- Personal information --------------------------------------------
-  studentCode      String   @unique // human-facing Student ID (distinct from cuid pk)
+  studentCode      String   @unique
   firstName        String
   middleName       String?
   lastName         String
@@ -39,9 +37,8 @@ model Student {
   email            String   @unique
   phoneNumber      String
   address          String?
-  passportPhotoUrl String?  // secure object storage reference, not a public URL
+  passportPhotoUrl String?
 
-  // -- Academic information ----------------------------------------------
   schoolId            String
   school              School   @relation(fields: [schoolId], references: [id])
   faculty             String
@@ -52,7 +49,6 @@ model Student {
   academicSession     String
   siwesSession        String
 
-  // -- SIWES information ---------------------------------------------------
   siwesStartDate  DateTime?
   siwesEndDate    DateTime?
   placementStatus PlacementStatus @default(UNPLACED)
@@ -66,22 +62,18 @@ model Student {
   coordinatorId String?
   coordinator   User?    @relation("CoordinatorStudents", fields: [coordinatorId], references: [id])
 
-  // -- Verification ---------------------------------------------------------
   verificationStatus VerificationStatus @default(UNVERIFIED)
   verifiedById       String?
   verifiedBy         User?               @relation("StudentVerifiedBy", fields: [verifiedById], references: [id])
   verifiedAt         DateTime?
 
-  // -- Relations ----------------------------------------------------------
   documents    Document[]
   activities   Activity[]
   applications Application[]
 
-  // -- Engagement (derived / cached, recomputed by a scheduled job) -------
   engagementStatus        EngagementStatus @default(INACTIVE)
   lastActivitySubmittedAt DateTime?
 
-  // -- Audit ----------------------------------------------------------------
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

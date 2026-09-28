@@ -1,12 +1,14 @@
+// src/server.ts
+// Just the entrypoint: load env vars, then boot the app defined in app.ts.
+// This MUST be the first import in the whole run, before app.ts, so that
+// every env-reading module app.ts pulls in (supabase.ts, prisma.ts) sees
+// a populated process.env the moment it loads.
 
-import dotenv from "dotenv";
+import "dotenv/config";
 import app from "./app.js";
-dotenv.config();
 
+const PORT = process.env.PORT || 4000;
 
-
-const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`SIWESFlow API listening on port ${PORT}`);
 });

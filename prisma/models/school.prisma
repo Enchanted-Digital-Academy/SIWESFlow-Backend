@@ -21,7 +21,6 @@ model School {
   website String?
   logoUrl String?
 
-  // -- SIWES administration -------------------------------------------------
   coordinatorId    String?
   coordinator      User?   @relation("SchoolCoordinator", fields: [coordinatorId], references: [id])
   coordinatorEmail String?
@@ -33,18 +32,14 @@ model School {
   levels            String[]
   siwesRequirements String?
 
-  // -- Verification (current status — see Verification model for history) --
   verificationStatus VerificationStatus @default(UNVERIFIED)
   verifiedById       String?
   verifiedBy         User?               @relation("SchoolVerifiedBy", fields: [verifiedById], references: [id])
   verifiedAt         DateTime?
 
-  // -- Relations ------------------------------------------------------------
   students          Student[]
   approvedCompanies Company[] @relation("SchoolApprovedCompanies")
   documents         Document[]
-  // Verification history: query Verification where entityType = SCHOOL
-  // and entityId = this school's id.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

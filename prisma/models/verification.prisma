@@ -33,11 +33,6 @@ model Verification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // NOTE: entityId deliberately has no @relation — a single column can't be
-  // a real foreign key into four different tables. Look up the target row
-  // in application code, e.g.:
-  //   if (v.entityType === "SCHOOL") prisma.school.findUnique({ where: { id: v.entityId } })
-
   @@index([entityType, entityId])
   @@index([status])
 }
