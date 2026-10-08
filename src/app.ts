@@ -8,10 +8,14 @@
 import express from "express";
 import { prisma } from "./lib/prisma.js";
 import { documentRouter } from "./routes/document.routes.js";
+import  authRouter  from "./modules/auth/auth.router.js";
+import { errorHandler } from "./middlewares/errorhandlers.js";
 
 const app = express();
 
 app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
+app.use("/api/auth", authRouter);
 
 app.get("/health", async (_req, res) => {
   try {
@@ -22,10 +26,11 @@ app.get("/health", async (_req, res) => {
   }
 });
 
-app.use("/auth", (_req, res) => {
-  res.status(501).json({ message: "Auth routes not yet implemented" });
-});
-
 app.use("/documents", documentRouter);
+
+
+
+
+app.use(errorHandler)
 
 export default app;
