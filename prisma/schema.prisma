@@ -26,10 +26,14 @@ enum UserRole {
 model User {
   id       String   @id @default(uuid())
   email    String   @unique
-  password String
+  passwordHash String
   role     UserRole
 
   isEmailVerified Boolean @default(false)
+
+
+  //Email verification tokenHash
+  emailVerificationTokens EmailVerificationToken[]
 
   // -- Reverse relations: what this user IS --------------------------------
   student           Student?

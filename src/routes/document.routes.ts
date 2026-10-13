@@ -5,8 +5,8 @@ import {
   createDocument,
   getDocumentSignedUrl,
   deleteDocument,
-} from "../services/document.service.js";
-import { InvalidFileError } from "../services/storage.service.js";
+} from "../modules/document/document.service.js";
+import { InvalidFileError } from "../modules/storage/storage.service.js";
 import type { DocumentType } from "../generated/prisma/client.js";
 
 const upload = multer({

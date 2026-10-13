@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { supabase, DOCUMENTS_BUCKET } from "../lib/supabase.js";
+import { supabase, DOCUMENTS_BUCKET } from "../../lib/supabase.js";
 
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",

@@ -1,10 +1,10 @@
-import type { Document, DocumentType } from "../generated/prisma/client.js";
-import { prisma } from "../lib/prisma.js";
+import type { Document, DocumentType } from "../../generated/prisma/client.js";
+import { prisma } from "../../lib/prisma.js";
 import {
   uploadDocumentFile,
   getSignedDocumentUrl,
   deleteDocumentFile,
-} from "./storage.service.js";
+} from "../storage/storage.service.js";
 
 type OwnerType = "student" | "school" | "company" | "supervisor";
 
