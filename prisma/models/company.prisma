@@ -16,6 +16,10 @@ model Company {
   phone   String
   logoUrl String?
 
+  // The COMPANY_ADMIN user who manages this company profile.
+  ownerUserId String? @unique
+  owner       User?   @relation("CompanyOwner", fields: [ownerUserId], references: [id])
+
   cacNumber              String?
   registrationDocumentId String?
 

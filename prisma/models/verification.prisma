@@ -29,10 +29,30 @@ model Verification {
   notes           String?
 
   documents Document[]
+  events    VerificationEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([entityType, entityId])
   @@index([status])
+}
+
+// Append-only audit trail of every status transition on a Verification.
+model VerificationEvent {
+  id String @id @default(cuid())
+
+  verificationId String
+  verification   Verification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+
+  fromStatus VerificationStatus?
+  toStatus   VerificationStatus
+
+  actorId String?
+  actor   User?   @relation("VerificationEventActor", fields: [actorId], references: [id])
+  note    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([verificationId])
 }

@@ -20,18 +20,32 @@ model Placement {
 
   isActive Boolean @default(true)
 
+  // School approval of the placement. New placements start PENDING.
+  approvalStatus PlacementApprovalStatus @default(PENDING)
+  approvedById   String?
+  approvedBy     User?                   @relation("PlacementApprovedBy", fields: [approvedById], references: [id])
+  approvedAt     DateTime?
+  approvalNote   String?
+
   applications Application[]
-  student      Student?
+  students     Student[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([companyId])
   @@index([isActive])
+  @@index([approvalStatus])
 }
 
 enum WorkMode {
   ON_SITE
   REMOTE
   HYBRID
+}
+
+enum PlacementApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

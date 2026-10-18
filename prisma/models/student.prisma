@@ -53,7 +53,7 @@ model Student {
   siwesEndDate    DateTime?
   placementStatus PlacementStatus @default(UNPLACED)
 
-  placementId String?    @unique
+  placementId String?
   placement   Placement? @relation(fields: [placementId], references: [id])
 
   supervisorId String?
@@ -78,6 +78,7 @@ model Student {
   updatedAt DateTime @updatedAt
 
   @@index([schoolId])
+  @@index([placementId])
   @@index([placementStatus])
   @@index([verificationStatus])
   @@index([engagementStatus])

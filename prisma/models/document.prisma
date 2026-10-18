@@ -1,7 +1,6 @@
-// A document belongs to exactly one owner. Add this Postgres CHECK
-// constraint in your migration SQL to enforce it:
-//   ALTER TABLE "Document" ADD CONSTRAINT document_single_owner
-//   CHECK (num_nonnulls("studentId","schoolId","companyId","supervisorId") = 1);
+// A document belongs to exactly one owner. This is enforced in Postgres by the
+// "document_single_owner" CHECK constraint (migration 20261019090100) and
+// validated again in document.service.ts before insert.
 
 enum DocumentType {
   PASSPORT_PHOTO
@@ -16,6 +15,8 @@ enum DocumentType {
   GOVERNMENT_ID
   PROOF_OF_EMPLOYMENT
   ACTIVITY_EVIDENCE
+  COMPLETION_LETTER
+  COMPLETION_CERTIFICATE
   OTHER
 }
 

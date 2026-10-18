@@ -41,6 +41,9 @@ model User {
   confirmedSupervisors  Supervisor[]   @relation("SupervisorConfirmedBy")
   uploadedDocuments     Document[]     @relation("DocumentUploadedBy")
   reviewedVerifications Verification[] @relation("VerificationReviewedBy")
+  verificationEvents    VerificationEvent[] @relation("VerificationEventActor")
+  companyOwned          Company?       @relation("CompanyOwner")
+  approvedPlacements    Placement[]    @relation("PlacementApprovedBy")
 
   verifiedStudents    Student[]    @relation("StudentVerifiedBy")
   verifiedSchools     School[]     @relation("SchoolVerifiedBy")
