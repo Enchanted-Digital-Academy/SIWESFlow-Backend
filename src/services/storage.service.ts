@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
+import type { FileFormat } from "../generated/prisma/client.js";
 import { supabase, DOCUMENTS_BUCKET } from "../lib/supabase.js";
+import { checkUploadedFile } from "../lib/file-signature.js";
 
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -17,6 +19,7 @@ export class InvalidFileError extends Error {}
 export interface UploadResult {
   storageKey: string;
   fileSizeBytes: number;
+  fileFormat: FileFormat;
 }
 
 export async function uploadDocumentFile(params: {
@@ -39,6 +42,11 @@ export async function uploadDocumentFile(params: {
     );
   }
 
+  const check = checkUploadedFile(buffer, filename, mimeType);
+  if (!check.ok || !check.fileFormat) {
+    throw new InvalidFileError(check.error ?? "Invalid file");
+  }
+
   const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   const storageKey = `${ownerType}/${ownerId}/${documentType}/${randomUUID()}-${safeFilename}`;
 
@@ -53,7 +61,7 @@ export async function uploadDocumentFile(params: {
     throw new Error(`Supabase Storage upload failed: ${error.message}`);
   }
 
-  return { storageKey, fileSizeBytes: buffer.byteLength };
+  return { storageKey, fileSizeBytes: buffer.byteLength, fileFormat: check.fileFormat };
 }
 
 export async function getSignedDocumentUrl(
@@ -81,4 +89,31 @@ export async function deleteDocumentFile(storageKey: string): Promise<void> {
   if (error) {
     throw new Error(`Supabase Storage delete failed: ${error.message}`);
   }
+}
+export interface StoredObject {
+  key: string;
+  size: number | null;
+}
+
+// Walks the bucket under `prefix` and returns every object. Folders have a
+// null id in Supabase's listing, so they are recursed into rather than returned.
+export async function listStoredObjects(prefix = ""): Promise<StoredObject[]> {
+  const out: StoredObject[] = [];
+  const pageSize = 1000;
+
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await supabase.storage
+      .from(DOCUMENTS_BUCKET)
+      .list(prefix, { limit: pageSize, offset });
+    if (error) throw new Error(`Supabase Storage list failed: ${error.message}`);
+    if (!data || data.length === 0) break;
+
+    for (const entry of data) {
+      const key = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.id === null) out.push(...(await listStoredObjects(key)));
+      else out.push({ key, size: typeof entry.metadata?.size === "number" ? entry.metadata.size : null });
+    }
+    if (data.length < pageSize) break;
+  }
+  return out;
 }
