@@ -12,6 +12,7 @@ import { studentRouter } from "./modules/profiles/student.routes.js";
 import { schoolRouter } from "./modules/profiles/school.routes.js";
 import { companyRouter } from "./modules/profiles/company.routes.js";
 import { supervisorRouter } from "./modules/profiles/supervisor.routes.js";
+import { activityRouter } from "./modules/activity/activity.routes.js";
 import { verificationRouter } from "./modules/verification/verification.routes.js";
 import { integrityRouter } from "./modules/admin/integrity.routes.js";
 import { httpErrorHandler } from "./middlewares/http-error-handler.js";
@@ -39,6 +40,7 @@ app.use("/api/students", studentRouter);
 app.use("/api/schools", schoolRouter);
 app.use("/api/companies", companyRouter);
 app.use("/api/supervisors", supervisorRouter);
+app.use("/api/activities", activityRouter);
 app.use("/api/verifications", verificationRouter);
 app.use("/api/admin/integrity", integrityRouter);
 
